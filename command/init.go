@@ -15,7 +15,7 @@ import (
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	"github.com/hashicorp/packer/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
-	"github.com/hashicorp/packer/packer/plugin-getter/github"
+	publiczip "github.com/hashicorp/packer/packer/plugin-getter/public-zip"
 	"github.com/hashicorp/packer/version"
 	"github.com/posener/complete"
 )
@@ -95,15 +95,18 @@ for more info.`)
 	log.Printf("[TRACE] init: %#v", opts)
 
 	getters := []plugingetter.Getter{
-		&github.Getter{
-			// In the past some terraform plugins downloads were blocked from a
-			// specific aws region by s3. Changing the user agent unblocked the
-			// downloads so having one user agent per version will help mitigate
-			// that a little more. Especially in the case someone forks this
-			// code to make it more aggressive or something.
-			// TODO: allow to set this from the config file or an environment
-			// variable.
-			UserAgent: "packer-getter-github-" + version.String(),
+		// &github.Getter{
+		// 	// In the past some terraform plugins downloads were blocked from a
+		// 	// specific aws region by s3. Changing the user agent unblocked the
+		// 	// downloads so having one user agent per version will help mitigate
+		// 	// that a little more. Especially in the case someone forks this
+		// 	// code to make it more aggressive or something.
+		// 	// TODO: allow to set this from the config file or an environment
+		// 	// variable.
+		// 	UserAgent: "packer-getter-github-" + version.String(),
+		// },
+		&publiczip.Getter{
+			UserAgent: "packer-getter-public-zip-" + version.String(),
 		},
 	}
 

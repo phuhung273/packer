@@ -5,6 +5,7 @@ package addrs
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2"
@@ -110,22 +111,17 @@ func ParsePluginSourceString(str string) (*Plugin, hcl.Diagnostics) {
 
 	// split the source string into individual components
 	parts := strings.Split(str, "/")
-	if len(parts) != 3 {
-		diags = diags.Append(&hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Invalid plugin source string",
-			Detail:   `The "source" attribute must be in the format "hostname/namespace/name"`,
-		})
-		return nil, diags
-	}
 
 	// check for an invalid empty string in any part
 	for i := range parts {
+		log.Printf("[DEBUG] Hey, index %d is %s", i, parts[i]) // TODO: remove debug here
+
 		if parts[i] == "" {
+
 			diags = diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Invalid plugin source string",
-				Detail:   `The "source" attribute must be in the format "hostname/namespace/name"`,
+				Detail:   fmt.Sprintf(`Hey, %s is invalid as index %d`, parts[i], i), // TODO: remove debug here
 			})
 			return nil, diags
 		}
@@ -157,8 +153,10 @@ func ParsePluginSourceString(str string) (*Plugin, hcl.Diagnostics) {
 	}
 	ret.Namespace = namespace
 
-	// the hostname is always the first part in a three-part source string
-	ret.Hostname = parts[0]
+	// the hostname is always the first-to-last-second part
+	hostname := strings.Join(parts[0:len(parts)-2], "/")
+	ret.Hostname = hostname
+	fmt.Sprintf(`Hey, this is hostname: %q`, hostname) // TODO: remove debug here
 
 	// Due to how plugin executables are named and plugin git repositories
 	// are conventionally named, it's a reasonable and

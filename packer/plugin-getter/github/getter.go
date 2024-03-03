@@ -35,7 +35,7 @@ type Getter struct {
 
 var _ plugingetter.Getter = &Getter{}
 
-func transformChecksumStream() func(in io.ReadCloser) (io.ReadCloser, error) {
+func TransformChecksumStream() func(in io.ReadCloser) (io.ReadCloser, error) {
 	return func(in io.ReadCloser) (io.ReadCloser, error) {
 		defer in.Close()
 		rd := bufio.NewReader(in)
@@ -76,7 +76,7 @@ func transformChecksumStream() func(in io.ReadCloser) (io.ReadCloser, error) {
 
 // transformVersionStream get a stream from github tags and transforms it into
 // something Packer wants, namely a json list of Release.
-func transformVersionStream(in io.ReadCloser) (io.ReadCloser, error) {
+func TransformVersionStream(in io.ReadCloser) (io.ReadCloser, error) {
 	if in == nil {
 		return nil, fmt.Errorf("transformVersionStream got nil body")
 	}
@@ -197,7 +197,7 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 	case "releases":
 		u := filepath.ToSlash("/repos/" + opts.PluginRequirement.Identifier.RealRelativePath() + "/git/matching-refs/tags")
 		req, err = g.Client.NewRequest("GET", u, nil)
-		transform = transformVersionStream
+		transform = TransformVersionStream
 	case "sha256":
 		// something like https://github.com/sylviamoss/packer-plugin-comment/releases/download/v0.2.11/packer-plugin-comment_v0.2.11_x5_SHA256SUMS
 		u := filepath.ToSlash("https://github.com/" + opts.PluginRequirement.Identifier.RealRelativePath() + "/releases/download/" + opts.Version() + "/" + opts.PluginRequirement.FilenamePrefix() + opts.Version() + "_SHA256SUMS")
@@ -206,7 +206,7 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 			u,
 			nil,
 		)
-		transform = transformChecksumStream()
+		transform = TransformChecksumStream()
 	case "zip":
 		u := filepath.ToSlash("https://github.com/" + opts.PluginRequirement.Identifier.RealRelativePath() + "/releases/download/" + opts.Version() + "/" + opts.ExpectedZipFilename())
 		req, err = g.Client.NewRequest(
